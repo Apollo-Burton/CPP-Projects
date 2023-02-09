@@ -1,7 +1,7 @@
 #include <iostream>  
 #include <vector>
 
-std::vector<int> sieve_of_eratosthenes(int max) {
+std::vector<int> sieve(int max) {
         
     std::vector<int> primes;
     std::vector<bool> nums(max, true);
@@ -42,7 +42,7 @@ int main() {
 
     if (input <= 2000000000) {
         
-        std::vector<int> primes = sieve_of_eratosthenes(input); 
+        std::vector<int> primes = sieve(input); 
 
         if (input <= 1000000) {
 
