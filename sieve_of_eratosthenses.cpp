@@ -35,10 +35,10 @@ std::vector<int> sieve(int max) {
 
 int main() { 
     
-    int input;
+    int inut;
     std::string pref;
     std::cout << "Range: 1, ";
-    std::cin >> input;
+    std::cin >> inut;
 
     if (input <= 2000000000) {
         
