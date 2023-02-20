@@ -2,17 +2,18 @@
 #include <vector>
 
 std::vector<int> sieve(int max) {
-        
-    std::vector<int> primes;
+    
+    // Creating a vector of bools with true/false on the corresponding index. True if prime and false if composite
     std::vector<bool> nums(max, true);
 
-    for (int i = 2; i*i <= max; i++) { 
+    for (int p = 2; p*p <= max; p++) { 
         
-        if (nums[i]) {
+        // Setting all multiples of prime numbers to false
+        if (nums[p]) {
 
-            for (int p = i*i; p <= max; p += i) {
+            for (int i = p*p; i <= max; i += p) {
 
-                nums[p] = false;
+                nums[i] = false;
 
             } 
         
@@ -20,6 +21,8 @@ std::vector<int> sieve(int max) {
 
     }
 
+    // Creating the primes vector by checking if the index of nums is true or false
+    std::vector<int> primes;
     for (int i = 2; i <= max; i++) {
        
         if (nums[i]) {
@@ -35,15 +38,18 @@ std::vector<int> sieve(int max) {
 
 int main() { 
     
+    // Taking user input to see what number they want to find the primes up to, and if they want to see the numbers or how many there are
     int input;
     std::string pref;
     std::cout << "Range: 1, ";
     std::cin >> input;
 
+    // Only running the program if the input is less than or equal to 2,000,000,000
     if (input <= 2000000000) {
         
         std::vector<int> primes = sieve(input); 
 
+        // Only giving the option to print the primes if the input is less than or equal to 1,000,000
         if (input <= 1000000) {
 
             std::cout << "Would you like to see the list of primes? (Y/n) ";
