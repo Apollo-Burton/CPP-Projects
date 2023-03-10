@@ -61,6 +61,7 @@ int main()
 	std::cout << "\n";
 
 	quick_sort(vec);
+	
 	std::cout << "  Sorted: ";
 	for (int i : vec) {
 		std::cout << i << " ";
