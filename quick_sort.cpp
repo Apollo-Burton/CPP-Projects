@@ -19,7 +19,7 @@ std::vector<int> quick_sort(std::vector<int> &vec)
 	bool pointingh = false;
 	
 	// Running quick sort
-	while(pointerl <= pointerh || pointerh >= pointerl) {
+	while(pointerl < pointerh || pointerh > pointerl) {
 		if (vec[pointerl] > vec[pivot]) {
 			pointingl = true;
 		}
