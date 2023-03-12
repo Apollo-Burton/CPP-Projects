@@ -5,9 +5,12 @@
 
 std::vector<int> selection_sort(std::vector<int> vec)
 {
-    for (int i = 0; i < vec.size(); i++) {
-        for (int j = i + 1; j < vec.size(); j++) {
-            if (vec[i] > vec[j]) {
+    for (int i = 0; i < vec.size(); i++)
+    {
+        for (int j = i + 1; j < vec.size(); j++)
+	{
+            if (vec[i] > vec[j])
+	    {
                 std::swap(vec[i], vec[j]);
             }
         }
@@ -17,11 +20,13 @@ std::vector<int> selection_sort(std::vector<int> vec)
 
 std::vector<int> partition(std::vector<int> vec)
 {
-	if (vec.size() <= 1) {
+	if (vec.size() <= 1)
+	{
 	    vec.push_back(0);
 	    return vec;
 	}
-    if (vec.size() == 2) {
+    if (vec.size() == 2)
+    {
         vec = selection_sort(vec);
         vec.push_back(0);
         return vec;
@@ -33,13 +38,16 @@ std::vector<int> partition(std::vector<int> vec)
 	int back = vec.size() - 1;
 	int pivot = selection_sort({vec[start], vec[middle], vec[back]})[1];
 	
-	if (pivot == vec[start]) {
+	if (pivot == vec[start])
+	{
 	    pivot = start;
 	}
-	if (pivot == vec[middle]) {
+	if (pivot == vec[middle])
+	{
 	    pivot = middle;
 	}
-	if (pivot == vec[back]) {
+	if (pivot == vec[back])
+	{
 	    pivot = back;
 	}
 	
@@ -51,31 +59,39 @@ std::vector<int> partition(std::vector<int> vec)
 	std::swap(vec[back], vec[pivot]);
 	std::swap(back, pivot);
 
-	while (pointerl <= pointerh) {
-		if (vec[pointerl] > vec[pivot]) {
+	while (pointerl <= pointerh)
+	{
+		if (vec[pointerl] > vec[pivot])
+		{
 			pointingl = true;
 		}
-		if (vec[pointerh] < vec[pivot]) {
+		if (vec[pointerh] < vec[pivot])
+		{
 			pointingh = true;
 		}
-		if (pointingl && pointingh) {
+		if (pointingl && pointingh)
+		{
 			std::swap(vec[pointerl], vec[pointerh]);
 			pointingl = false;
 			pointingh = false;
 		}
-		if (pointingl == false) {
+		if (pointingl == false)
+		{
 			pointerl++;
 		}
-		if (pointingh == false && pointingl) {
+		if (pointingh == false && pointingl)
+		{
 			pointerh--;
 		}
 	}
 	
-	if (pointingl) {
+	if (pointingl)
+	{
 		std::swap(vec[pointerl], vec[pivot]);
 		pivot = pointerl;
 	}
-	if (pointingh) {
+	if (pointingh)
+	{
 		std::swap(vec[pointerh], vec[pivot]);
 		pivot = pointerh;
 	}
@@ -100,23 +116,28 @@ std::vector<int> recursion(std::vector<int> input)
 	sorted1[pivot] = vec[pivot];
     	vec.pop_back();
     
-	for (int i = 0; i < sorted1.size(); i++) {
+	for (int i = 0; i < sorted1.size(); i++)
+	{
 	    vec1.push_back(vec[i]);
 	}
-	for (int i = split + 1; i < vec.size(); i++) {
+	for (int i = split + 1; i < vec.size(); i++)
+	{
 	    vec2.push_back(vec[i]);
 	}
 	
 	// Running recursion
-	if (vec1.size() > 1) {
+	if (vec1.size() > 1)
+	{
 		vec1 = recursion(vec1);
 	}
-	if (vec2.size() > 1) {
+	if (vec2.size() > 1)
+	{
 		vec2 = recursion(vec2);
 	}
     
     // Merging and returning the vectors
-	for (int i : vec2) {
+	for (int i : vec2)
+	{
 	    vec1.push_back(i);
 	}
 	
@@ -128,7 +149,8 @@ int main()
 	std::vector<int> vec = {7, 8, 10, 2, 26, 4, 13, 5, 3, 16, 11, 6, 12, 19};
 	
 	std::cout << " Unsorted: ";
-	for (int i : vec) {
+	for (int i : vec)
+	{
 		std::cout << i << " ";
 	}
 
@@ -136,11 +158,13 @@ int main()
 	std::vector<int> sorted = recursion(vec);
  
 	std::cout << "\n\nPartition: ";
-	for (int i = 0; i < partitioned.size() - 1; i++) {
+	for (int i = 0; i < partitioned.size() - 1; i++)
+	{
 		std::cout << partitioned[i] << " ";
 	}
 	std::cout << "\n\nRecursion: ";
-	for (int i : sorted) {
+	for (int i : sorted)
+	{
 	    std::cout << i << " ";
 	}
 }
