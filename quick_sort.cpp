@@ -35,9 +35,7 @@ int partition(int l, int h)
 		// elements less than or equal to the pivot to the left, and the
 		// elements greater than the pivot to the right.
 		if (i < j)
-		{
 			std::swap(a[i], a[j]);
-		}
 	}
 	// Move the pivot to the correct position, which is j.
 	std::swap(a[l], a[j]);
@@ -60,18 +58,16 @@ int main()
 	int size = 20000;
 	char pref;
 	
-	std::cout << "See sorted array? (Y/n) ";
-	std::cin >> pref;
-
 	std::cout << "\nSorting array...\n";
 	quick_sort(0, size);  // Sort the entire array.
 	std::cout << "Array sorted\n\n";
 	
+	std::cout << "See sorted array? (Y/n) ";  // Ask if user wants to see the sorted array.
+	std::cin >> pref;
+
 	if (pref == 'Y')
-	{
 		for (int i = 0; i < size; i++)
 		{
-			std::cout << a[i] << ", ";  // Print out the sorted array.
+			std::cout << a[i] << ", ";  // Print out the sorted array if preference is yes.
 		}
-	}
 }
