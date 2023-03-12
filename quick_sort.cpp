@@ -1,4 +1,4 @@
-// There is a rogue segfault in this code I need to find
+// There is a stack overflow in this code I need to find when the input vector in recursion() has more than 40 elements on average
 
 #include <iostream>
 #include <vector>
