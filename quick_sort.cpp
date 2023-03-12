@@ -46,7 +46,7 @@ int partition(int l, int h)
 // Sort the array a between indices l and h (inclusive) using quicksort.
 void quick_sort(int l, int h)
 {
-    if (l < h)
+    if (l < h) // If the partitioned array has 1 element or less, stop the recursion. The array is sorted
     {
         int j = partition(l, h);  // Divide the array into two partitions.
         quick_sort(l, j);  // Sort the left partition.
