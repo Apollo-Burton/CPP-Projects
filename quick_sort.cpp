@@ -1,35 +1,55 @@
-// Broken as fuck
+// There is a rogue segfault in this code I need to find
 
 #include <iostream>
 #include <vector>
 
-// Function that swaps parameters
-void swap(int &a, int &b)
+std::vector<int> selection_sort(std::vector<int> vec)
 {
-	int temp = a;
-	a = b;
-	b = temp;
+    for (int i = 0; i < vec.size(); i++) {
+        for (int j = i + 1; j < vec.size(); j++) {
+            if (vec[i] > vec[j]) {
+                std::swap(vec[i], vec[j]);
+            }
+        }
+    }
+    return vec;
 }
 
-std::vector<std::vector<int>> partition(std::vector<int> vec)
+std::vector<int> partition(std::vector<int> vec)
 {
-	if (vec.size() == 1) {
-	    return {{vec}, {vec}, {0, vec[0]}};
+	if (vec.size() <= 1) {
+	    vec.push_back(0);
+	    return vec;
 	}
-	if (vec.size() == 0) {
-	    return {{0}, {0}, {0, 0}};
+    if (vec.size() == 2) {
+        vec = selection_sort(vec);
+        vec.push_back(0);
+        return vec;
+    }
+    
+	// Choosing pivot
+	int start = 0;
+	int middle = vec.size() / 2;
+	int back = vec.size() - 1;
+	int pivot = selection_sort({vec[start], vec[middle], vec[back]})[1];
+	
+	if (pivot == vec[start]) {
+	    pivot = start;
 	}
-	// Initializing variables
-	std::vector<int> vec1;
-	std::vector<int> vec2;
-	int pivot = vec.size() / 2;
-	int	back = vec.size() - 1;
+	if (pivot == vec[middle]) {
+	    pivot = middle;
+	}
+	if (pivot == vec[back]) {
+	    pivot = back;
+	}
+	
+	// Starting partition
 	int pointerl = 0;
 	int pointerh = vec.size() - 2;
 	bool pointingl = false;
 	bool pointingh = false;
-	swap(vec[back], vec[pivot]);
-	swap(back, pivot);
+	std::swap(vec[back], vec[pivot]);
+	std::swap(back, pivot);
 
 	while (pointerl <= pointerh) {
 		if (vec[pointerl] > vec[pivot]) {
@@ -39,78 +59,88 @@ std::vector<std::vector<int>> partition(std::vector<int> vec)
 			pointingh = true;
 		}
 		if (pointingl && pointingh) {
-			swap(vec[pointerl], vec[pointerh]);
+			std::swap(vec[pointerl], vec[pointerh]);
 			pointingl = false;
 			pointingh = false;
 		}
 		if (pointingl == false) {
 			pointerl++;
 		}
-		if (pointingh == false) {
+		if (pointingh == false && pointingl) {
 			pointerh--;
 		}
 	}
-	// swap(back, pivot);
-	// swap(vec[back], vec[pivot]);
 	
 	if (pointingl) {
-		swap(vec[pointerl], vec[pivot]);
+		std::swap(vec[pointerl], vec[pivot]);
 		pivot = pointerl;
 	}
 	if (pointingh) {
-		swap(vec[pointerh], vec[pivot]);
+		std::swap(vec[pointerh], vec[pivot]);
 		pivot = pointerh;
 	}
-	for (int i = 0; i < pivot; i++) {
-		vec1.push_back(vec[i]);
-	}
-	for (int i = pivot + 1; i < vec.size(); i++) {
-		vec2.push_back(vec[i]);
-	}
-	return {{vec1}, {vec2}, {pivot, vec[pivot]}};
+	
+	// Adding the pivot index to the back of the vector to be used in recursion
+	vec.push_back(pivot);
+	return vec;
 }
 
 std::vector<int> recursion(std::vector<int> input)
 {
-	std::vector<std::vector<int>> vec = partition(input);
-	std::vector<int> vec1 = vec[0];
-	std::vector<int> vec2 = vec[1];
-	std::vector<int> sorted(input.size());
-	int sorted_size = 1;
-	sorted[vec[2][0]] = vec[2][1];
+	// Partitioning input vector and initializing variables
+	std::vector<int> vec = partition(input);
+	std::vector<int> vec1;
+	std::vector<int> vec2;
+	int pivot = vec.back();
+	int split = pivot;
 	
-	while (sorted_size <= input.size() && vec[0].size() > 1) {
-		if (vec[0].size() > 1) {
-		    vec = partition(vec1);
-		    vec1 = vec[0];
-		}
-		sorted[vec[2][0]] = vec[2][1];
-		sorted_size++;
-		
-		if (vec[1].size() > 1) {
-            vec = partition(vec2);
-            vec2 = vec[1];
-		}
-		sorted[vec[2][0]] = vec[2][1];
-        sorted_size++;
+	// Splitting vectors on partition
+	std::vector<int> sorted1(split + 1);
+	std::vector<int> sorted2(input.size() - (split + 1));
+	sorted1[pivot] = vec[pivot];
+    vec.pop_back();
+    
+	for (int i = 0; i < sorted1.size(); i++) {
+	    vec1.push_back(vec[i]);
 	}
-	return sorted;
+	for (int i = split + 1; i < vec.size(); i++) {
+	    vec2.push_back(vec[i]);
+	}
+	
+	// Running recursion
+	if (vec1.size() > 1) {
+		vec1 = recursion(vec1);
+	}
+	if (vec2.size() > 1) {
+		vec2 = recursion(vec2);
+	}
+    
+    // Merging and returning the vectors
+	for (int i : vec2) {
+	    vec1.push_back(i);
+	}
+	
+	return vec1;
 }
 
 int main()
 {
-	std::vector<int> vec = {4, 8, 6, 2, 5, 8, 45, 3, 7, 3, 7, 9, 1, 34, 2, 15, 7, 5};
+	std::vector<int> vec = {7, 8, 10, 2, 26, 4, 13, 5, 3, 16, 11, 6, 12, 19};
 	
-	std::cout << "Unsorted: ";
+	std::cout << " Unsorted: ";
 	for (int i : vec) {
 		std::cout << i << " ";
 	}
-	std::cout << "\n";
 
+	std::vector<int> partitioned = partition(vec);
 	std::vector<int> sorted = recursion(vec);
-
-	std::cout << "  Sorted: ";
+ 
+	std::cout << "\n\nPartition: ";
+	for (int i = 0; i < partitioned.size() - 1; i++) {
+		std::cout << partitioned[i] << " ";
+	}
+	std::cout << "\n\nRecursion: ";
 	for (int i : sorted) {
-		std::cout << i << " ";
+	    std::cout << i << " ";
 	}
 }
