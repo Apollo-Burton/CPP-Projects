@@ -98,7 +98,7 @@ std::vector<int> recursion(std::vector<int> input)
 	std::vector<int> sorted1(split + 1);
 	std::vector<int> sorted2(input.size() - (split + 1));
 	sorted1[pivot] = vec[pivot];
-    vec.pop_back();
+    	vec.pop_back();
     
 	for (int i = 0; i < sorted1.size(); i++) {
 	    vec1.push_back(vec[i]);
