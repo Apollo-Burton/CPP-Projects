@@ -55,19 +55,19 @@ void quick_sort(int l, int h)
 
 int main()
 {
-	int size = 20000;
+	int size = 10;
 	char pref;
 	
 	std::cout << "\nSorting array...\n";
 	quick_sort(0, size);  // Sort the entire array.
 	std::cout << "Array sorted\n\n";
 	
-	std::cout << "See sorted array? (Y/n) ";  // Ask if user wants to see the sorted array.
+	std::cout << "See sorted array? (Y/n) ";
 	std::cin >> pref;
 
 	if (pref == 'Y')
 		for (int i = 0; i < size; i++)
 		{
-			std::cout << a[i] << ", ";  // Print out the sorted array if preference is yes.
+			std::cout << a[i] << ", ";  // Print out the sorted array.
 		}
 }
