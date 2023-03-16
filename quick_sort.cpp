@@ -2,7 +2,7 @@
 
 int a[10] = {1309,2982,2013,1994,2651,2610,3096,448,2018,350};
 // The numbers the algorithm will sort ^.
-
+int size = 10;
 
 // Partition the array a between indices l and h (inclusive) by selecting the
 // first element as the pivot and dividing the array such that elements less
@@ -53,21 +53,39 @@ void quick_sort(int l, int h)
 	}
 }
 
+std::string verify_sort()
+{
+	std::string status;
+	status = "succesfully";
+	for (int i = 0; i < size; i += 2)
+		if (a[i] > a[i + 1])
+			status = "unsuccesfully";
+	return status;
+}
+
 int main()
 {
-	int size = 10;
 	char pref;
+	char verify;
+	std::string status;
 	
 	std::cout << "\nSorting array...\n";
 	quick_sort(0, size);  // Sort the entire array.
-	std::cout << "Array sorted\n\n";
 	
-	std::cout << "See sorted array? (Y/n) ";
+	std::cout << "Verify sort? (Y/n) "; // Ask if the user wants to verify the sort.
+	std::cin >> verify;
+
+	if (verify == 'Y')
+	{
+		status = verify_sort(); // Verify the sort if the user wants to.
+		std::cout << "Array " << status << " sorted\n\n";
+	}
+
+	std::cout << "See new array? (Y/n) ";
 	std::cin >> pref;
 
 	if (pref == 'Y')
 		for (int i = 0; i < size; i++)
-		{
 			std::cout << a[i] << ", ";  // Print out the sorted array.
-		}
+	std::cout << "\n";
 }
