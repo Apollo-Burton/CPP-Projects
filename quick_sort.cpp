@@ -55,12 +55,10 @@ void quick_sort(int l, int h)
 
 std::string verify_sort()
 {
-	std::string status;
-	status = "succesfully";
 	for (int i = 0; i < size; i += 2)
 		if (a[i] > a[i + 1])
-			status = "unsuccesfully";
-	return status;
+			return "unsuccesfully;
+	return "succesfully;
 }
 
 int main()
