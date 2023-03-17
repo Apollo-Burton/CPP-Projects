@@ -70,12 +70,12 @@ int main()
 	std::cout << "\nSorting array...\n";
 	quick_sort(0, size);  // Sort the entire array.
 	
-	std::cout << "Verify sort? (Y/n) "; // Ask if the user wants to verify the sort.
+	std::cout << "Verify sort? (Y/n) ";  // Ask if the user wants to verify the sort.
 	std::cin >> verify;
 
 	if (verify == 'Y')
 	{
-		status = verify_sort(); // Verify the sort if the user wants to.
+		status = verify_sort();  // Verify the sort if the user wants to.
 		std::cout << "Array " << status << " sorted\n\n";
 	}
 
