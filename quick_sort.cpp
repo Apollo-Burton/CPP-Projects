@@ -57,8 +57,8 @@ std::string verify_sort()
 {
 	for (int i = 0; i < size; i += 2)
 		if (a[i] > a[i + 1])
-			return "unsuccesfully;
-	return "succesfully;
+			return "unsuccesfully";
+	return "succesfully";
 }
 
 int main()
