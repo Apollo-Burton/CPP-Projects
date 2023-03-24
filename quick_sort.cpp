@@ -53,12 +53,13 @@ void quick_sort(int l, int h)
 	}
 }
 
+// Verifies the sort of the entire array
 std::string verify_sort()
 {
-	for (int i = 0; i < size - 1; i++)
+	for (int i = 0; i < size - 1; i += 1)
 		if (a[i] > a[i + 1])
-			return "unsuccesfully";
-	return "succesfully";
+			return "Array unsuccesfully sorted";
+	return "Array succesfully sorted";
 }
 
 int main()
@@ -69,6 +70,7 @@ int main()
 	
 	std::cout << "\nSorting array...\n";
 	quick_sort(0, size);  // Sort the entire array.
+	std::cout << "Sorting complete\n\n";
 	
 	std::cout << "Verify sort? (Y/n) ";  // Ask if the user wants to verify the sort.
 	std::cin >> verify;
@@ -76,7 +78,7 @@ int main()
 	if (verify == 'Y')
 	{
 		status = verify_sort();  // Verify the sort if the user wants to.
-		std::cout << "Array " << status << " sorted\n\n";
+		std::cout << status << "\n\n";
 	}
 
 	std::cout << "See new array? (Y/n) ";
@@ -84,6 +86,8 @@ int main()
 
 	if (pref == 'Y')
 		for (int i = 0; i < size; i++)
-			std::cout << a[i] << ", ";  // Print out the sorted array.
+			std::cout << a[i] << ", ";  // Print out the sorted array if the user wants to.
 	std::cout << "\n";
+
+	return 0;
 }
