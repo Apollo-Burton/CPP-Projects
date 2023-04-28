@@ -35,9 +35,9 @@ int main()
 			brightness_map[i] = '.';
 		else if (i < 85)
 			brightness_map[i] = ':';
-        else if (i < 110)
-            brightness_map[i] = 'o';
-        else if (i < 135)
+       		else if (i < 110)
+            		brightness_map[i] = 'o';
+        	else if (i < 135)
 			brightness_map[i] = '2';
 		else if (i < 150)
 			brightness_map[i] = 'O';
