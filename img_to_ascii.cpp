@@ -13,22 +13,7 @@ int main()
     int width = csbi.dwSize.X;
 	int height = csbi.dwSize.Y;
 
-	std::string path;
-    int num;
-    std::cin >> num;
-
-    if (num == 1)
-        path = "C:\\Users\\User\\Videos\\Captures\\3.png";
-    else if (num == 2)
-        path = "C:\\Users\\User\\Videos\\Digital Combat Simulator  Black Shark\\Digital Combat Simulator  Black Shark Screenshot 2022.09.30 - 23.03.08.59.png";
-    else if (num == 3)
-        path = "C:\\Users\\User\\Videos\\Red Dead Redemption 2\\Red Dead Redemption 2 Screenshot 2023.03.10 - 20.07.43.05.png";
-    else if (num == 4)
-        path = "C:\\Users\\User\\Videos\\Star Wars Jedi  Fallen Order\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 18.31.17.34.png";
-    else if (num == 5)
-        path = "C:\\Users\\User\\Videos\\Star Wars Jedi  Fallen Order\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 00.33.58.39.png";
-    else
-        path = "C:\\Users\\User\\Programs\\Resources\\lenna.jpg";
+	std::string path = "C:\\Users\\User\\Lenna.jpg";
 
 	cv::Mat frame = cv::imread(path);
 	
