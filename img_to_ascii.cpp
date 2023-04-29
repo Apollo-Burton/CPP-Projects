@@ -1,3 +1,8 @@
+// NOTE
+// Program developed using the VSCode standard output. I believe that it uses the font "Consolas"
+// If you use a standard output with a different formatting or font, the proportions of the
+// image might be off
+
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cmath>
@@ -14,26 +19,7 @@ int main()
     int screen_width = csbi.dwSize.X;
 	int screen_height = csbi.dwSize.Y;
 
-	std::string path;
-    int num;
-    std::cin >> num;
-
-    if (num == 1)
-        path = "C:\\Users\\User\\Videos\\Captures\\3.png";
-    else if (num == 2)
-        path = "C:\\Users\\User\\Programs\\Resources\\Digital Combat Simulator  Black Shark Screenshot 2022.09.30 - 23.03.08.59.png";
-    else if (num == 3)
-        path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.03.10 - 20.07.43.05.png";
-    else if (num == 4)
-        path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 18.31.17.34.png";
-	else if (num == 5)
-		path = "C:\\Users\\User\\Programs\\Resources\\ULTRAKILL 1_12_2023 10_59_12 PM.png";
-	else if (num == 6)
-		path = "C:\\Users\\User\\Programs\\Resources\\Forza Horizon 5 Screenshot 2022.02.12 - 15.55.22.69.png";
-    else if (num == 7)
-        path = "C:\\Users\\User\\Programs\\Resources\\cpp.png";
-    else
-        path = "C:\\Users\\User\\Programs\\Resources\\lenna.jpg";
+	std::string path = "C:\\Users\\User\\Programs\\Resources\\lenna.jpg";
 
 	cv::Mat frame = cv::imread(path);
 	
