@@ -11,12 +11,12 @@
 int main()
 {
 	// get the handle of the standard output window
-    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+   	 HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     
-    // get the dimensions of the standard output window
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(hStdout, &csbi);
-    int screen_width = csbi.dwSize.X;
+    	// get the dimensions of the standard output window
+    	CONSOLE_SCREEN_BUFFER_INFO csbi;
+    	GetConsoleScreenBufferInfo(hStdout, &csbi);
+    	int screen_width = csbi.dwSize.X;
 	int screen_height = csbi.dwSize.Y;
 
 	std::string path = "C:\\Users\\User\\Programs\\Resources\\lenna.jpg";
@@ -46,9 +46,9 @@ int main()
 			brightness_map[i] = '.';
 		else if (i < 75)
 			brightness_map[i] = ':';
-        else if (i < 110)
-            brightness_map[i] = '-';
-        else if (i < 130)
+        	else if (i < 110)
+            		brightness_map[i] = '-';
+        	else if (i < 130)
 			brightness_map[i] = '=';
 		else if (i < 150)
 			brightness_map[i] = '/';
