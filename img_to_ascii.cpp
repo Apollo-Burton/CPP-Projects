@@ -1,10 +1,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/utils/logger.hpp>
 #include <iostream>
-#include <cmath>
 #include <Windows.h>
 #include <fstream>
-#include <cstdio>
 
 const int MAX_CHANNEL_VALUE = 255;
 
@@ -41,7 +39,7 @@ double get_intensity(cv::Vec4b& pixel)
     return sum / (MAX_CHANNEL_VALUE * 4);
 }
 
-std::string convert_image(cv::Mat image, int num_channels)
+std::string convert_image(cv::Mat image, int num_channels, bool inverted)
 {
     std::vector<char> chars = {' ', '.', ':', '-', '=', '/', 'o', '0', '@'};
     std::string ascii_image;
@@ -54,22 +52,22 @@ std::string convert_image(cv::Mat image, int num_channels)
 			if (image.channels() == 1)
 			{
 				uchar pixel_data = image.at<uchar>(r, c);
-				index = static_cast<int>(std::round(get_intensity(pixel_data) * (chars.size() - 1)));
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
 			}
 			if (image.channels() == 2)
 			{
 				cv::Vec2b pixel_data = image.at<cv::Vec2b>(r, c);
-				index = static_cast<int>(std::round(get_intensity(pixel_data) * (chars.size() - 1)));
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
 			}
 			else if (image.channels() == 3)
 			{
 				cv::Vec3b pixel_data = image.at<cv::Vec3b>(r, c);
-				index = static_cast<int>(std::round(get_intensity(pixel_data) * (chars.size() - 1)));
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
 			}
 			else if (image.channels() == 4)
 			{
 				cv::Vec4b pixel_data = image.at<cv::Vec4b>(r, c);
-				index = static_cast<int>(std::round(get_intensity(pixel_data) * (chars.size() - 1)));
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
 			}
             ascii_image += chars[index];
         }
@@ -92,8 +90,39 @@ int main()
 	int screen_height = csbi.dwSize.Y;
 
 	std::string path;
-	std::cout << "Enter image path:\n";
+	std::cout << "Enter image path or a number from 1-10 for sample images:\n";
     std::getline(std::cin, path);
+
+	char invert;
+	bool inverted = false;
+	std::cout << "Inverted colors? (Y/n) ";
+	std::cin >> invert;
+
+	if (invert == 'Y')
+		inverted = true;
+
+    if (path == "1")
+        path = "C:\\Users\\User\\Programs\\Resources\\lenna.jpg";
+    else if (path == "2")
+        path = "C:\\Users\\User\\Programs\\Resources\\Digital Combat Simulator  Black Shark Screenshot 2022.09.30 - 23.03.08.59.png";
+    else if (path == "3")
+        path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.03.10 - 20.07.43.05.png";
+    else if (path == "4")
+        path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 18.31.17.34.png";
+	else if (path == "5")
+		path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.05.26 - 17.35.12.94.png";
+	else if (path == "6")
+		path = "C:\\Users\\User\\Programs\\Resources\\Forza Horizon 5 Screenshot 2022.02.12 - 15.55.22.69.png";
+	else if (path == "7")
+		path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 17.55.37.94.png";
+    else if (path == "8")
+        path = "C:\\Users\\User\\Programs\\Resources\\cards.jpg";
+	else if (path == "9")
+		path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.05.26 - 17.35.21.40.png";
+	else if (path == "10")
+		path = "C:\\Users\\User\\Programs\\Resources\\jakob-rosen-KCXM1vtXvJs-unsplash.jpg";
+    else if (path == "richter")
+		path = "C:\\Users\\User\\Videos\\Captures\\3.png";
 
 	cv::Mat image = cv::imread(path, cv::IMREAD_UNCHANGED);
 	if (image.empty())
@@ -111,7 +140,7 @@ int main()
 	// Outputting ASCII characters based on the brightness of the pixel
 	std::cout << "\n\n\n\n\n";
 
-	std::string ascii_image = convert_image(image, image.channels());
+	std::string ascii_image = convert_image(image, image.channels(), inverted);
 	std::cout << ascii_image;
 
 	char pref;
