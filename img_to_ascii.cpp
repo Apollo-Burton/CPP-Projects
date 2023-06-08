@@ -90,7 +90,7 @@ int main()
 	int screen_height = csbi.dwSize.Y;
 
 	std::string path;
-	std::cout << "Enter image path or a number from 1-10 for sample images:\n";
+	std::cout << "Enter image path:\n";
     std::getline(std::cin, path);
 
 	char invert;
@@ -100,29 +100,6 @@ int main()
 
 	if (invert == 'Y')
 		inverted = true;
-
-    if (path == "1")
-        path = "C:\\Users\\User\\Programs\\Resources\\lenna.jpg";
-    else if (path == "2")
-        path = "C:\\Users\\User\\Programs\\Resources\\Digital Combat Simulator  Black Shark Screenshot 2022.09.30 - 23.03.08.59.png";
-    else if (path == "3")
-        path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.03.10 - 20.07.43.05.png";
-    else if (path == "4")
-        path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 18.31.17.34.png";
-	else if (path == "5")
-		path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.05.26 - 17.35.12.94.png";
-	else if (path == "6")
-		path = "C:\\Users\\User\\Programs\\Resources\\Forza Horizon 5 Screenshot 2022.02.12 - 15.55.22.69.png";
-	else if (path == "7")
-		path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 17.55.37.94.png";
-    else if (path == "8")
-        path = "C:\\Users\\User\\Programs\\Resources\\cards.jpg";
-	else if (path == "9")
-		path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.05.26 - 17.35.21.40.png";
-	else if (path == "10")
-		path = "C:\\Users\\User\\Programs\\Resources\\jakob-rosen-KCXM1vtXvJs-unsplash.jpg";
-    else if (path == "richter")
-		path = "C:\\Users\\User\\Videos\\Captures\\3.png";
 
 	cv::Mat image = cv::imread(path, cv::IMREAD_UNCHANGED);
 	if (image.empty())
