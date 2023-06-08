@@ -1,15 +1,87 @@
-// NOTE
-// Program developed using the VSCode standard output. I believe that it uses the font "Consolas"
-// If you use a standard output with a different formatting or font, the proportions of the
-// image might be off
-
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/utils/logger.hpp>
 #include <iostream>
 #include <cmath>
 #include <Windows.h>
+#include <fstream>
+#include <cstdio>
+
+const int MAX_CHANNEL_VALUE = 255;
+
+// Get intensity of a pixel with 1 channel
+double get_intensity(uchar& pixel)
+{
+	return pixel / MAX_CHANNEL_VALUE;
+}
+
+// Get intensity of a pixel with 2 channels
+double get_intensity(cv::Vec2b& pixel)
+{
+    double sum = 0;
+    for (int i = 0; i < 2; i++)
+        sum += pixel[i];
+    return sum / (MAX_CHANNEL_VALUE * 2);
+}
+
+// Get intensity of a pixel with 3 channels
+double get_intensity(cv::Vec3b& pixel)
+{
+    double sum = 0;
+    for (int i = 0; i < 3; i++)
+        sum += pixel[i];
+    return sum / (MAX_CHANNEL_VALUE * 3);
+}
+
+// Get intensity of a pixel with 4 channels
+double get_intensity(cv::Vec4b& pixel)
+{
+    double sum = 0;
+    for (int i = 0; i < 4; i++)
+        sum += pixel[i];
+    return sum / (MAX_CHANNEL_VALUE * 4);
+}
+
+std::string convert_image(cv::Mat image, int num_channels)
+{
+    std::vector<char> chars = {' ', '.', ':', '-', '=', '/', 'o', '0', '@'};
+    std::string ascii_image;
+	int index;
+
+    for (int r = 0; r < image.rows; r++)
+    {
+        for (int c = 0; c < image.cols; c++)
+        {
+			if (image.channels() == 1)
+			{
+				uchar pixel_data = image.at<uchar>(r, c);
+				index = static_cast<int>(std::round(get_intensity(pixel_data) * (chars.size() - 1)));
+			}
+			if (image.channels() == 2)
+			{
+				cv::Vec2b pixel_data = image.at<cv::Vec2b>(r, c);
+				index = static_cast<int>(std::round(get_intensity(pixel_data) * (chars.size() - 1)));
+			}
+			else if (image.channels() == 3)
+			{
+				cv::Vec3b pixel_data = image.at<cv::Vec3b>(r, c);
+				index = static_cast<int>(std::round(get_intensity(pixel_data) * (chars.size() - 1)));
+			}
+			else if (image.channels() == 4)
+			{
+				cv::Vec4b pixel_data = image.at<cv::Vec4b>(r, c);
+				index = static_cast<int>(std::round(get_intensity(pixel_data) * (chars.size() - 1)));
+			}
+            ascii_image += chars[index];
+        }
+        ascii_image += "\n";
+    }
+    return ascii_image;
+}
 
 int main()
 {
+	cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+
 	// get the handle of the standard output window
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -18,64 +90,71 @@ int main()
     GetConsoleScreenBufferInfo(hStdout, &csbi);
     int screen_width = csbi.dwSize.X;
 	int screen_height = csbi.dwSize.Y;
-	
-    std::string path = "C:\\Users\\User\\Programs\\Resources\\lenna.jpg";
 
-	cv::Mat frame = cv::imread(path);
+	std::string path;
+	std::cout << "Enter image path:\n";
+    std::getline(std::cin, path);
 
-	cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
-
-	// Resize image to fit the output window
-	double aspect_ratio = static_cast<double>(frame.cols) / static_cast<double>(frame.rows);
-
-	// For some reason, when you zoom out, the std output squishes and stretches your image. 2.3, 2.4, 2.9, 3.9 are the magic numbers that (almost) fix the image at different zoom levels
-	if (screen_width == 618)
-		cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 2.8)));
-	else if (screen_width <= 365)
-		cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 2.3)));
-	else if (screen_width <= 621)
-		cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 2.5)));
-	else if (screen_width <= 941)
-		cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 2.9)));
-	else
-		cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 3.9)));
-	
-	// Grayscale pixel values with corresponding ASCII characters
-	std::unordered_map<int, char> brightness_map;
-	for (int i = 0; i <= 255; i++)
+	cv::Mat image = cv::imread(path, cv::IMREAD_UNCHANGED);
+	if (image.empty())
 	{
-		if (i < 30)
-			brightness_map[i] = ' ';
-		else if (i < 55)
-			brightness_map[i] = '.';
-		else if (i < 85)
-			brightness_map[i] = ':';
-        else if (i < 115)
-            brightness_map[i] = '-';
-        else if (i < 140)
-			brightness_map[i] = '=';
-		else if (i < 165)
-			brightness_map[i] = '/';
-		else if (i < 180)
-			brightness_map[i] = 'o';
-		else if (i < 210)
-			brightness_map[i] = '0';
-		else
-			brightness_map[i] = '@';
+		std::cout << "Image failed to open. Check file/path integrity\n";
+		return -1;
 	}
 
+	// Resize image to fit the output window
+	double aspect_ratio = static_cast<double>(image.cols) / static_cast<double>(image.rows);
+
+	// Resize image to fit the output window and keep it's original aspect ratio
+	cv::resize(image, image, cv::Size(static_cast<int>(std::round(screen_height * aspect_ratio * 2)), screen_height - 1));
+
 	// Outputting ASCII characters based on the brightness of the pixel
-	cv::uint8_t gray;
 	std::cout << "\n\n\n\n\n";
 
-	for (int r = 0; r < frame.rows; r++)
-		for (int c = 0; c < frame.cols; c++)
-		{
-			gray = frame.at<uint8_t>(cv::Point(c, r));
-			std::cout << brightness_map[gray];
+	std::string ascii_image = convert_image(image, image.channels());
+	std::cout << ascii_image;
 
-			// If I change >= to ==, then I know that everything we know about reality will break, c will increase by 2, and then the program will shit itself, spontaniously combust, and explode
-			if (c >= frame.cols)
-				std::cout << "\n";
+	char pref;
+	std::cout << "\n\n\nExport to text file? (Y/n) ";
+	std::cin >> pref;
+
+	if (pref != 'Y')
+		return 0;
+	
+	std::string file_name;
+	for (int i = 0; i < path.size(); i++)
+	{
+		if (path[i] == '\\') // The file name should not include the file path
+		{
+			file_name.clear();
+			continue;
 		}
+		else if (path[i] == '.') // The file name should not include .png or .jpg
+			break;
+		file_name += path[i];
+	}
+	
+	std::ofstream new_file;
+	std::string ascii_image_path = "C:\\Users\\User\\ascii_art\\" + file_name + " (ASCII ART).txt";
+	new_file.open(ascii_image_path, std::ios::out);
+
+	if (!new_file.is_open())
+	{
+		std::cout << "Failed to open/create file for writing\n";
+		return -1;
+	}
+
+	new_file << ascii_image; // Write the ascii image to the file
+
+	if (new_file.fail())
+	{
+		std::cout << "File succesfully opened/created, but failed to write image\n";
+		new_file.close();
+		std::remove(ascii_image_path.c_str()); // Delete file
+		return -1;
+	}
+
+	std::cout << "File succesfully opened/created and written to\n" << "The file path is: " + ascii_image_path << "\n";
+	new_file.close();
+	return 0;
 }
