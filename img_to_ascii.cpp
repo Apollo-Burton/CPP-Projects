@@ -15,40 +15,40 @@ double get_intensity(uchar& pixel)
 // Get intensity of a pixel with 2 channels
 double get_intensity(cv::Vec2b& pixel)
 {
-    double sum = 0;
-    for (int i = 0; i < 2; i++)
-        sum += pixel[i];
-    return sum / (MAX_CHANNEL_VALUE * 2);
+	double sum = 0;
+	for (int i = 0; i < 2; i++)
+		sum += pixel[i];
+	return sum / (MAX_CHANNEL_VALUE * 2);
 }
 
 // Get intensity of a pixel with 3 channels
 double get_intensity(cv::Vec3b& pixel)
 {
-    double sum = 0;
-    for (int i = 0; i < 3; i++)
-        sum += pixel[i];
-    return sum / (MAX_CHANNEL_VALUE * 3);
+	double sum = 0;
+	for (int i = 0; i < 3; i++)
+		sum += pixel[i];
+	return sum / (MAX_CHANNEL_VALUE * 3);
 }
 
 // Get intensity of a pixel with 4 channels
 double get_intensity(cv::Vec4b& pixel)
 {
-    double sum = 0;
-    for (int i = 0; i < 4; i++)
-        sum += pixel[i];
-    return sum / (MAX_CHANNEL_VALUE * 4);
+	double sum = 0;
+	for (int i = 0; i < 4; i++)
+		sum += pixel[i];
+	return sum / (MAX_CHANNEL_VALUE * 4);
 }
 
 std::string convert_image(cv::Mat image, int num_channels, bool inverted)
 {
-    std::vector<char> chars = {' ', '.', ':', '-', '=', '/', 'o', '0', '@'};
-    std::string ascii_image;
+	std::vector<char> chars = {' ', '.', ':', '-', '=', '/', 'o', '0', '@'};
+	std::string ascii_image;
 	int index;
 
-    for (int r = 0; r < image.rows; r++)
-    {
-        for (int c = 0; c < image.cols; c++)
-        {
+	for (int r = 0; r < image.rows; r++)
+	{
+		for (int c = 0; c < image.cols; c++)
+		{
 			if (image.channels() == 1)
 			{
 				uchar pixel_data = image.at<uchar>(r, c);
@@ -69,11 +69,11 @@ std::string convert_image(cv::Mat image, int num_channels, bool inverted)
 				cv::Vec4b pixel_data = image.at<cv::Vec4b>(r, c);
 				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
 			}
-            ascii_image += chars[index];
-        }
-        ascii_image += "\n";
-    }
-    return ascii_image;
+			ascii_image += chars[index];
+		}
+		ascii_image += "\n";
+	}
+	return ascii_image;
 }
 
 int main()
@@ -81,17 +81,47 @@ int main()
 	cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
 
 	// get the handle of the standard output window
-    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    // get the dimensions of the standard output window
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(hStdout, &csbi);
-    int screen_width = csbi.dwSize.X;
+	// get the dimensions of the standard output window
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(hStdout, &csbi);
+	int screen_width = csbi.dwSize.X;
 	int screen_height = csbi.dwSize.Y;
 
 	std::string path;
-	std::cout << "Enter image path:\n";
-    std::getline(std::cin, path);
+	std::cout << "Enter image path or a number from 1-10 for sample images:\n";
+	std::getline(std::cin, path);
+
+	if (path == "1")
+		path = "C:\\Users\\User\\Programs\\Resources\\lenna.jpg";
+	else if (path == "2")
+		path = "C:\\Users\\User\\Programs\\Resources\\Digital Combat Simulator  Black Shark Screenshot 2022.09.30 - 23.03.08.59.png";
+	else if (path == "3")
+		path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.03.10 - 20.07.43.05.png";
+	else if (path == "4")
+		path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 18.31.17.34.png";
+	else if (path == "5")
+		path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.05.26 - 17.35.12.94.png";
+	else if (path == "6")
+		path = "C:\\Users\\User\\Programs\\Resources\\Forza Horizon 5 Screenshot 2022.02.12 - 15.55.22.69.png";
+	else if (path == "7")
+		path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order Screenshot 2022.06.19 - 17.55.37.94.png";
+	else if (path == "8")
+		path = "C:\\Users\\User\\Programs\\Resources\\cards.jpg";
+	else if (path == "9")
+		path = "C:\\Users\\User\\Programs\\Resources\\Red Dead Redemption 2 Screenshot 2023.05.26 - 17.35.21.40.png";
+	else if (path == "10")
+		path = "C:\\Users\\User\\Programs\\Resources\\jakob-rosen-KCXM1vtXvJs-unsplash.jpg";
+	else if (path == "richter")
+		path = "C:\\Users\\User\\Videos\\Captures\\3.png";
+
+	cv::Mat image = cv::imread(path, cv::IMREAD_UNCHANGED);
+	if (image.empty())
+	{
+		std::cout << "Image failed to open. Check file/path integrity\n";
+		return -1;
+	}
 
 	char invert;
 	bool inverted = false;
@@ -100,13 +130,6 @@ int main()
 
 	if (invert == 'Y')
 		inverted = true;
-
-	cv::Mat image = cv::imread(path, cv::IMREAD_UNCHANGED);
-	if (image.empty())
-	{
-		std::cout << "Image failed to open. Check file/path integrity\n";
-		return -1;
-	}
 
 	// Resize image to fit the output window
 	double aspect_ratio = static_cast<double>(image.cols) / static_cast<double>(image.rows);
@@ -126,7 +149,7 @@ int main()
 
 	if (pref != 'Y')
 		return 0;
-	
+
 	std::string file_name;
 	for (int i = 0; i < path.size(); i++)
 	{
@@ -139,7 +162,7 @@ int main()
 			break;
 		file_name += path[i];
 	}
-	
+
 	std::ofstream new_file;
 	std::string ascii_image_path = "C:\\Users\\User\\ascii_art\\" + file_name + " (ASCII ART).txt";
 	new_file.open(ascii_image_path, std::ios::out);
