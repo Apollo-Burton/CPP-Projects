@@ -1,108 +1,244 @@
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/utils/logger.hpp>
 #include <iostream>
+#include <thread>
+#include <vector>
 #include <cmath>
 #include <chrono>
+#include <unordered_map>
 #include <Windows.h>
+
+const int MAX_CHANNEL_VALUE = 255;
+
+// Get intensity of a pixel with 1 channel
+double get_intensity(uchar& pixel)
+{
+	return pixel / MAX_CHANNEL_VALUE;
+}
+
+// Get intensity of a pixel with 2 channels
+double get_intensity(cv::Vec2b& pixel)
+{
+    double sum = 0;
+    for (int i = 0; i < 2; i++)
+        sum += pixel[i];
+    return sum / (MAX_CHANNEL_VALUE * 2);
+}
+
+// Get intensity of a pixel with 3 channels
+double get_intensity(cv::Vec3b& pixel)
+{
+    double sum = 0;
+    for (int i = 0; i < 3; i++)
+        sum += pixel[i];
+    return sum / (MAX_CHANNEL_VALUE * 3);
+}
+
+// Get intensity of a pixel with 4 channels
+double get_intensity(cv::Vec4b& pixel)
+{
+    double sum = 0;
+    for (int i = 0; i < 4; i++)
+        sum += pixel[i];
+    return sum / (MAX_CHANNEL_VALUE * 4);
+}
+
+void frame_to_ascii(cv::Mat frame, std::string& ascii_frame, int screen_width, int screen_height, bool inverted)
+{
+	if (frame.empty()) // Stop if there are no frames left
+		return;
+	
+	std::vector<char> chars = {' ', '.', ':', '-', '=', '/', 'o', '0', '@'}; // Characters that ascii_frame will consist of
+	int index;
+
+	double aspect_ratio = static_cast<double>(frame.cols) / static_cast<double>(frame.rows);
+
+	// Resize frame to fit the output window and keep it's original aspect ratio
+	if (std::round(screen_height * aspect_ratio * 2) <= screen_width)
+		cv::resize(frame, frame, cv::Size(static_cast<int>(std::round(screen_height * aspect_ratio * 2)), screen_height - 1)); 
+	else
+		cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio / 2))));
+
+	ascii_frame.clear(); // Make sure output string is empty
+	
+	for (int r = 0; r < frame.rows; r++)
+    {
+        for (int c = 0; c < frame.cols; c++)
+        {
+			// Adding a character to ascii_frame based on the corresponding pixels intensity
+			if (frame.channels() == 1)
+			{
+				uchar pixel_data = frame.at<uchar>(r, c);
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
+			}
+			if (frame.channels() == 2)
+			{
+				cv::Vec2b pixel_data = frame.at<cv::Vec2b>(r, c);
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
+			}
+			else if (frame.channels() == 3)
+			{
+				cv::Vec3b pixel_data = frame.at<cv::Vec3b>(r, c);
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
+			}
+			else if (frame.channels() == 4)
+			{
+				cv::Vec4b pixel_data = frame.at<cv::Vec4b>(r, c);
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
+			}
+            ascii_frame += chars[index];
+        }
+        ascii_frame += "\n"; // Create new row
+    }
+}
 
 int main()
 {
+	cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+
 	// get the handle of the standard output window
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-	
+
 	// get the dimensions of the standard output window
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(hStdout, &csbi);
 	int screen_width = csbi.dwSize.X;
 	int screen_height = csbi.dwSize.Y;
 
-	std::string path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order 2022.06.19 - 00.42.18.03.DVR.mp4";
-	//path = "C:\\Users\\User\\Programs\\Resources\\Titanfall2 2022.05.13 - 23.24.44.02.DVR.mp4";
-	path = "C:\\Users\\User\\Programs\\Resources\\Digital Combat Simulator  Black Shark 2022.11.23 - 21.32.24.02.DVR.mp4";
-	//path = "C:\\Users\\User\\Programs\\Resources\\Desktop 2023.03.17 - 23.26.28.02.DVR.mp4";
-	//path = "C:\\Users\\User\\Programs\\Resources\\Chivalry 2 2022.10.22 - 15.40.58.02.DVR_Trim.mp4";
-	//path = "C:\\Users\\User\\Programs\\Resources\\Desktop 2023.03.17 - 23.27.16.03.DVR.mp4";
-	//path = "C:\\Users\\User\\Programs\\Resources\\Blade and Sorcery 2023.05.06 - 16.37.12.07.mp4";
-
-	// Grayscale pixel values with corresponding ASCII characters
-	std::unordered_map<int, char> brightness_map;
-	for (int i = 0; i <= 255; i++)
+	unsigned int num_system_threads = std::thread::hardware_concurrency(); // Get number of available threads
+	if (num_system_threads == 0)
 	{
-		if (i < 30)
-			brightness_map[i] = ' ';
-		else if (i < 55)
-			brightness_map[i] = '.';
-		else if (i < 85)
-			brightness_map[i] = ':';
-		else if (i < 115)
-			brightness_map[i] = '-';
-		else if (i < 140)
-			brightness_map[i] = '=';
-		else if (i < 165)
-			brightness_map[i] = '/';
-		else if (i < 180)
-			brightness_map[i] = 'o';
-		else if (i < 210)
-			brightness_map[i] = '0';
-		else
-			brightness_map[i] = '@';
+		std::cout << "Unable to get number of system threads\n";
+		return -1;
 	}
 
-	cv::VideoCapture stream(path);
-	double fps = stream.get(cv::CAP_PROP_FPS);
-	int ms_between_frames = static_cast<int>(1000.0 / fps);
+	std::string path;
+	std::cout << "Enter video path:\n";
+    std::getline(std::cin, path);
+
+	// Set up variables
+	cv::VideoCapture video(path);
+	if (!video.isOpened())
+	{
+		std::cout << "Video failed to open. Check file/path integrity\n";
+		return -1;
+	}
+
+	char invert;
+	bool inverted = false;
+	std::cout << "Inverted colors? (Y/n) ";
+	std::cin >> invert;
+
+	if (invert == 'Y')
+		inverted = true;
+	
 	cv::Mat frame;
-	double aspect_ratio;
-	cv::uint8_t gray;
-	std::string ascii_frame;
-	std::string row;
-	std::stringstream output;
+	int count = 0;
+	uint dot_count = 0;
+	int percentage_processed = 0;
+	int total_frames = static_cast<int>(video.get(cv::CAP_PROP_FRAME_COUNT));
+	double fps = video.get(cv::CAP_PROP_FPS);
+	int ms_between_frames = static_cast<int>(std::round(1000.0 / fps));
+	int limit;
+
+	std::vector<std::thread> threads;
+	std::vector<std::string> frames;
+	std::vector<std::string> temp_frames(static_cast<int>(num_system_threads * 0.75)); // "temp_frames" will be the vector the threads write to before those rendered frames get sent to the "threads" vector. 1 string (frame) per thread
+	
+	std::cout << "Enter how many seconds of the video to process (0 or less is the whole video): ";
+	std::cin >> limit;
+
+	limit = static_cast<int>(std::round(limit * fps));
+	
+	if (limit <= 0 || limit > total_frames)
+		limit = total_frames;
+
+	system("cls"); // Clear screen
+
+	auto start = std::chrono::high_resolution_clock::now(); // Start rendering timer
+	while (video.read(frame) && count < limit)
+	{
+		// Start threads in parallel
+		for (int i = 0; i < temp_frames.size(); i++)
+		{
+			threads.emplace_back(frame_to_ascii, frame, std::ref(temp_frames[i]), screen_width, screen_height, inverted); // Start thread using it's designated frame slot in "temp_frames" as the output
+			frame.release(); // Clear any remnants of the previous frame
+			video.read(frame); // Load next frame
+		}
+		for (int i = 0; i < temp_frames.size(); i++)
+		{
+			threads[i].join();
+			frames.push_back(temp_frames[i]); // Write the completed frames to the frames vector
+			temp_frames[i].clear(); // Clear temporary frames
+			count++;
+		}
+		threads.clear();
+		
+		// Display progress bar and "Processing..." animation
+		percentage_processed = static_cast<int>(static_cast<double>(count) / limit * 100);
+
+		if (percentage_processed > 100)
+			percentage_processed = 100;
+
+		SetConsoleCursorPosition(hStdout, {0, 0}); // Set cursor posititon to the top left of the console
+
+		// Display progress bar
+		std::cout << std::string(percentage_processed, '@') << std::string (100 - percentage_processed, '-') << "\n";
+		std::cout << std::string(percentage_processed, '@') << std::string (100 - percentage_processed, '-') << "\n";
+		std::cout << std::string(percentage_processed, '@') << std::string (100 - percentage_processed, '-') << "\n";
+		std::cout << std::string(48, ' ') << percentage_processed << "%\n"; // Display percent progressed in the middle of the progress bar
+
+		if (dot_count >= 3)
+			dot_count = 0;
+		else
+			dot_count++;
+		
+		std::cout << "\nProcessing" + std::string(dot_count, '.') + std::string(3 - dot_count, ' ') << "\n";
+	}
+
+	system("cls");
+	std::cout << "Processed!";
+
+	// Display diagnostic information
+	auto end = std::chrono::high_resolution_clock::now();
+	std::cout << "\nIt took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0  << " seconds to render " << count << " frames\n";
+	std::cout << "It took about " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / count << " milliseconds to render 1 frame\n";
+	std::cout << "It took about " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 / count * fps << " seconds to render 1 second of the video\n";
+	std::cout << "At this rate, it would take " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 / count * fps * 300 / 60 << " minutes to render a 5 minute video\n";
+
+	// Set up variables
+	long long duration;
+	double total = 0;
+	int p_count = 0;
+	std::chrono::steady_clock::time_point start_time;
+	std::chrono::steady_clock::time_point end_time;
+	char c;
+	std::cout << "\nRendering done. Enter any key to play video ";
+	std::cin >> c;
 
 	std::cout << "\n\n\n";
-	while (stream.read(frame))
+	for (const std::string& frame : frames)
 	{
-		if (!stream.read(frame))
-			break;
+		start_time = std::chrono::high_resolution_clock::now(); // Start display timer
 
-		auto start_time = std::chrono::high_resolution_clock::now();
+		std::cout << frame; // Output frame
 
-		cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
+		SetConsoleCursorPosition(hStdout, {0, 0}); // Set cursor position to the top left of the console
 
-		// Resize image to fit the output window
-		aspect_ratio = static_cast<double>(frame.cols) / static_cast<double>(frame.rows);
-
-		// For some reason, when you zoom out, the std output squishes and stretches your image. 2.2, 3.7 are the magic numbers that (almost) fix the image at different zoom levels
-		if (screen_width == 618)
-			cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 2.8)));
-		else if (screen_width <= 365)
-			cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 2.3)));
-		else if (screen_width <= 621)
-			cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 2.5)));
-		else if (screen_width <= 941)
-			cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 2.9)));
-		else
-			cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio) / 3.9)));
+		end_time = std::chrono::high_resolution_clock::now(); // End display timer
+		duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count(); // Total duration of displaying frame
 		
-		for (int r = 0; r < frame.rows; r++)
-		{
-			for (int c = 0; c < frame.cols; c++)
-			{
-				gray = frame.at<uint8_t>(r, c);
-				output << brightness_map[gray];
-			}
-			output << "\n";
-		}
+		// Taking average of time taken to display frame
+		total += duration;
+		p_count++;
 
-		std::cout << output.str() << std::flush;
-		output.str("");
-		COORD cursor_pos = {0, 0};
-		SetConsoleCursorPosition(hStdout, cursor_pos);
-
-		auto end_time = std::chrono::high_resolution_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-		if (duration < ms_between_frames * 2)
-			Sleep(static_cast<DWORD>((ms_between_frames * 2) - duration));
+		// This makes sure the video retains it's original speed. The new milliseconds between frames is ms_between_frames + duration.
+		// If we want to retain the original speed of the video, we need to keep the original milliseconds between frames, which is ms_between_frames - duration
+		if (duration < ms_between_frames)
+			Sleep(static_cast<DWORD>(ms_between_frames - duration));
 	}
-	
+	// Clear screen of the last frame
 	system("cls");
 	std::cout << "Playback finished\n";
+	std::cout << "The average time taken to output 1 frame was " << total / p_count << " milliseconds\n";
 }
