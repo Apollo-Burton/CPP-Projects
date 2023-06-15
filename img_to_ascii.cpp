@@ -158,7 +158,7 @@ int main()
 			file_name.clear();
 			continue;
 		}
-		else if (path[i] == '.') // The file name should not include .png or .jpg
+		else if (path[i] == '.' && i + 4 >= path.size()) // The file name should not include .png or .jpg
 			break;
 		file_name += path[i];
 	}
