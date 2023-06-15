@@ -133,7 +133,7 @@ int main()
 	else if (path == "7")
 		path = "C:\\Users\\User\\Programs\\Resources\\ASTRONEER 2022.07.09 - 11.17.04.02.mp4";
 	else if (path == "8")
-		path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order 2022.06.19 - 18.02.00.02.DVR.mp4";
+		path = "C:\\Users\\User\\Videos\\Captures\\Apex Legends 2022-01-02 18-28-37.mp4";
 	else if (path == "9")
 		path = "C:\\Users\\User\\Programs\\Resources\\War Thunder 2022.06.04 - 16.02.25.22.DVR.mp4";
 	else if (path == "10")
@@ -258,7 +258,7 @@ int main()
 		// This makes sure the video retains it's original speed. The new milliseconds between frames is ms_between_frames + duration.
 		// If we want to retain the original speed of the video, we need to keep the original milliseconds between frames, which is ms_between_frames - duration
 		if (duration < ms_between_frames)
-			Sleep(static_cast<DWORD>(ms_between_frames - duration));
+			Sleep(static_cast<DWORD>(std::round(ms_between_frames - duration)));
 	}
 	// Clear screen of the last frame
 	system("cls");
