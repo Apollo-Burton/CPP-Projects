@@ -19,35 +19,41 @@ double get_intensity(uchar& pixel)
 // Get intensity of a pixel with 2 channels
 double get_intensity(cv::Vec2b& pixel)
 {
-    double sum = 0;
-    for (int i = 0; i < 2; i++)
-        sum += pixel[i];
-    return sum / (MAX_CHANNEL_VALUE * 2);
+	double sum = 0;
+
+	for (int i = 0; i < 2; i++)
+		sum += pixel[i];
+
+	return sum / (MAX_CHANNEL_VALUE * 2);
 }
 
 // Get intensity of a pixel with 3 channels
 double get_intensity(cv::Vec3b& pixel)
 {
-    double sum = 0;
-    for (int i = 0; i < 3; i++)
-        sum += pixel[i];
-    return sum / (MAX_CHANNEL_VALUE * 3);
+	double sum = 0;
+
+	for (int i = 0; i < 3; i++)
+		sum += pixel[i];
+
+	return sum / (MAX_CHANNEL_VALUE * 3);
 }
 
 // Get intensity of a pixel with 4 channels
 double get_intensity(cv::Vec4b& pixel)
 {
-    double sum = 0;
-    for (int i = 0; i < 4; i++)
-        sum += pixel[i];
-    return sum / (MAX_CHANNEL_VALUE * 4);
+	double sum = 0;
+
+	for (int i = 0; i < 4; i++)
+		sum += pixel[i];
+
+	return sum / (MAX_CHANNEL_VALUE * 4);
 }
 
 void frame_to_ascii(cv::Mat frame, std::string& ascii_frame, int screen_width, int screen_height, bool inverted)
 {
 	if (frame.empty()) // Stop if there are no frames left
 		return;
-	
+
 	std::vector<char> chars = {' ', '.', ':', '-', '=', '/', 'o', '0', '@'}; // Characters that ascii_frame will consist of
 	int index;
 
@@ -55,25 +61,25 @@ void frame_to_ascii(cv::Mat frame, std::string& ascii_frame, int screen_width, i
 
 	// Resize frame to fit the output window and keep it's original aspect ratio
 	if (std::round(screen_height * aspect_ratio * 2) <= screen_width)
-		cv::resize(frame, frame, cv::Size(static_cast<int>(std::round(screen_height * aspect_ratio * 2)), screen_height - 1)); 
+		cv::resize(frame, frame, cv::Size(static_cast<int>(std::round(screen_height * aspect_ratio * 2)), screen_height - 1));
 	else
 		cv::resize(frame, frame, cv::Size(screen_width, static_cast<int>(std::round(screen_width / aspect_ratio / 2))));
 
 	ascii_frame.clear(); // Make sure output string is empty
-	
+
 	for (int r = 0; r < frame.rows; r++)
-    {
-        for (int c = 0; c < frame.cols; c++)
-        {
+	{
+		for (int c = 0; c < frame.cols; c++)
+		{
 			// Adding a character to ascii_frame based on the corresponding pixels intensity
 			if (frame.channels() == 1)
 			{
 				uchar pixel_data = frame.at<uchar>(r, c);
-				// If "inverted" is true, it will equal 1. If we subtract the size of chars from the index, we get the negative reverse value, so we use abs() to turn it positive. If "inverted" is false, 
-				// it equals 0, and we subtract: chars.size() * 0 from the index, which wont invert the value
-				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted)); 
+				// If "inverted" is true, it will equal 1. If we subtract the size of "chars" from the index, we get the negative reverse value, so we use abs() to turn it positive. If "inverted" is false,
+				// it equals 0, and we subtract: chars.size() - 1 * 0 from the index, which wont invert the value
+				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
 			}
-			if (frame.channels() == 2)
+			else if (frame.channels() == 2)
 			{
 				cv::Vec2b pixel_data = frame.at<cv::Vec2b>(r, c);
 				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
@@ -88,10 +94,12 @@ void frame_to_ascii(cv::Mat frame, std::string& ascii_frame, int screen_width, i
 				cv::Vec4b pixel_data = frame.at<cv::Vec4b>(r, c);
 				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
 			}
-            ascii_frame += chars[index];
-        }
-        ascii_frame += "\n"; // Create new row
-    }
+
+			ascii_frame += chars[index];
+		}
+
+		ascii_frame += "\n"; // Create new row
+	}
 }
 
 int main()
@@ -107,16 +115,9 @@ int main()
 	int screen_width = csbi.dwSize.X;
 	int screen_height = csbi.dwSize.Y;
 
-	unsigned int num_system_threads = std::thread::hardware_concurrency(); // Get number of available threads
-	if (num_system_threads == 0)
-	{
-		std::cout << "Unable to get number of system threads\n";
-		return -1;
-	}
-
 	std::string path;
 	std::cout << "Enter video path or a number from 1-10 for sample videos:\n";
-    std::getline(std::cin, path);
+	std::getline(std::cin, path);
 
 	if (path == "1")
 		path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order 2022.06.19 - 00.42.18.03.DVR.mp4";
@@ -141,6 +142,7 @@ int main()
 
 	// Set up variables
 	cv::VideoCapture video(path);
+
 	if (!video.isOpened())
 	{
 		std::cout << "Video failed to open. Check file/path integrity\n";
@@ -154,7 +156,7 @@ int main()
 
 	if (invert == 'Y')
 		inverted = true;
-	
+
 	cv::Mat frame;
 	int count = 0;
 	uint dot_count = 0;
@@ -162,41 +164,62 @@ int main()
 	int total_frames = static_cast<int>(video.get(cv::CAP_PROP_FRAME_COUNT));
 	double fps = video.get(cv::CAP_PROP_FPS);
 	int ms_between_frames = static_cast<int>(std::round(1000.0 / fps));
-	int limit;
+	int limit = 0;
+	bool error_processing = false;
+	unsigned int num_system_threads = std::thread::hardware_concurrency(); // Get number of available threads
+
+	if (num_system_threads == 0)
+	{
+		std::cout << "Unable to get number of system threads\n";
+		return -1;
+	}
 
 	std::vector<std::thread> threads;
 	std::vector<std::string> frames;
 	std::vector<std::string> temp_frames(static_cast<int>(num_system_threads * 0.75)); // "temp_frames" will be the vector the threads write to before those rendered frames get sent to the "threads" vector. 1 string (frame) per thread
-	
+
 	std::cout << "Enter how many seconds of the video to process (0 or less is the whole video): ";
 	std::cin >> limit;
 
 	limit = static_cast<int>(std::round(limit * fps));
-	
+
 	if (limit <= 0 || limit > total_frames)
 		limit = total_frames;
 
 	system("cls"); // Clear screen
+	auto start = std::chrono::high_resolution_clock::now(); // Start processing timer
 
-	auto start = std::chrono::high_resolution_clock::now(); // Start rendering timer
-	while (video.read(frame) && count < limit)
+	while (count < limit)
 	{
 		// Start threads in parallel
 		for (int i = 0; i < temp_frames.size(); i++)
 		{
+			// Load next frame
+			if (!video.read(frame))
+			{
+				count = limit; // If something went wrong, break out of the loop after joining the threads
+				error_processing = true;
+				break;
+			}
+
 			threads.emplace_back(frame_to_ascii, frame, std::ref(temp_frames[i]), screen_width, screen_height, inverted); // Start thread using it's designated frame slot in "temp_frames" as the output
 			frame.release(); // Clear any remnants of the previous frame
-			video.read(frame); // Load next frame
 		}
+
 		for (int i = 0; i < temp_frames.size(); i++)
 		{
 			threads[i].join();
-			frames.push_back(temp_frames[i]); // Write the completed frames to the frames vector
-			temp_frames[i].clear(); // Clear temporary frames
-			count++;
+
+			if (count < limit)
+			{
+				frames.push_back(temp_frames[i]); // Write the completed frames to the frames vector
+				temp_frames[i].clear(); // Clear temporary frames
+				count++;
+			}
 		}
+
 		threads.clear();
-		
+
 		// Display progress bar and "Processing..." animation
 		percentage_processed = static_cast<int>(static_cast<double>(count) / limit * 100);
 
@@ -215,16 +238,20 @@ int main()
 			dot_count = 0;
 		else
 			dot_count++;
-		
+
 		std::cout << "\nProcessing" + std::string(dot_count, '.') + std::string(3 - dot_count, ' ') << "\n";
 	}
 
 	system("cls");
-	std::cout << "Processed!";
 
 	// Display diagnostic information
+	if (error_processing)
+	{
+		std::cout << "There was an error processing the video, however, " << count / fps << " seconds were still processed\n";
+	}
+
 	auto end = std::chrono::high_resolution_clock::now();
-	std::cout << "\nIt took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0  << " seconds to render " << count << " frames\n";
+	std::cout << "It took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0  << " seconds to render " << count << " frames\n";
 	std::cout << "It took about " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / count << " milliseconds to render 1 frame\n";
 	std::cout << "It took about " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 / count * fps << " seconds to render 1 second of the video\n";
 	std::cout << "At this rate, it would take " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 / count * fps * 300 / 60 << " minutes to render a 5 minute video\n";
@@ -236,10 +263,11 @@ int main()
 	std::chrono::steady_clock::time_point start_time;
 	std::chrono::steady_clock::time_point end_time;
 	char c;
-	std::cout << "\nRendering done. Enter any key to play video ";
+	std::cout << "\nVideo done processing. Enter any key to play video ";
 	std::cin >> c;
 
 	std::cout << "\n\n\n";
+
 	for (const std::string& frame : frames)
 	{
 		start_time = std::chrono::high_resolution_clock::now(); // Start display timer
@@ -250,7 +278,7 @@ int main()
 
 		end_time = std::chrono::high_resolution_clock::now(); // End display timer
 		duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count(); // Total duration of displaying frame
-		
+
 		// Taking average of time taken to display frame
 		total += duration;
 		p_count++;
@@ -260,6 +288,7 @@ int main()
 		if (duration < ms_between_frames)
 			Sleep(static_cast<DWORD>(std::round(ms_between_frames - duration)));
 	}
+
 	// Clear screen of the last frame
 	system("cls");
 	std::cout << "Playback finished\n";
