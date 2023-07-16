@@ -208,7 +208,8 @@ int main()
 
 		for (int i = 0; i < temp_frames.size(); i++)
 		{
-			threads[i].join();
+			if (i < threads.size())
+				threads[i].join();
 
 			if (count < limit)
 			{
