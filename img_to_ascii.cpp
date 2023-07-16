@@ -16,8 +16,10 @@ double get_intensity(uchar& pixel)
 double get_intensity(cv::Vec2b& pixel)
 {
 	double sum = 0;
+
 	for (int i = 0; i < 2; i++)
 		sum += pixel[i];
+
 	return sum / (MAX_CHANNEL_VALUE * 2);
 }
 
@@ -25,8 +27,10 @@ double get_intensity(cv::Vec2b& pixel)
 double get_intensity(cv::Vec3b& pixel)
 {
 	double sum = 0;
+
 	for (int i = 0; i < 3; i++)
 		sum += pixel[i];
+
 	return sum / (MAX_CHANNEL_VALUE * 3);
 }
 
@@ -34,8 +38,10 @@ double get_intensity(cv::Vec3b& pixel)
 double get_intensity(cv::Vec4b& pixel)
 {
 	double sum = 0;
+
 	for (int i = 0; i < 4; i++)
 		sum += pixel[i];
+
 	return sum / (MAX_CHANNEL_VALUE * 4);
 }
 
@@ -69,10 +75,13 @@ std::string convert_image(cv::Mat image, int num_channels, bool inverted)
 				cv::Vec4b pixel_data = image.at<cv::Vec4b>(r, c);
 				index = static_cast<int>(abs(std::round((get_intensity(pixel_data) * (chars.size() - 1))) - (chars.size() - 1) * inverted));
 			}
+
 			ascii_image += chars[index];
 		}
+
 		ascii_image += "\n";
 	}
+
 	return ascii_image;
 }
 
@@ -117,6 +126,7 @@ int main()
 		path = "C:\\Users\\User\\Videos\\Captures\\3.png";
 
 	cv::Mat image = cv::imread(path, cv::IMREAD_UNCHANGED);
+
 	if (image.empty())
 	{
 		std::cout << "Image failed to open. Check file/path integrity\n";
@@ -151,6 +161,7 @@ int main()
 		return 0;
 
 	std::string file_name;
+
 	for (int i = 0; i < path.size(); i++)
 	{
 		if (path[i] == '\\') // The file name should not include the file path
@@ -158,8 +169,10 @@ int main()
 			file_name.clear();
 			continue;
 		}
+
 		else if (path[i] == '.' && i + 4 >= path.size()) // The file name should not include .png or .jpg
 			break;
+
 		file_name += path[i];
 	}
 
