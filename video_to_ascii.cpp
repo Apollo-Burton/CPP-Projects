@@ -7,6 +7,7 @@
 #include <chrono>
 #include <unordered_map>
 #include <Windows.h>
+#include <algorithm>
 
 const int MAX_CHANNEL_VALUE = 255;
 
@@ -102,6 +103,37 @@ void frame_to_ascii(cv::Mat frame, std::string& ascii_frame, int screen_width, i
 	}
 }
 
+void detect_inputs(int fps, int frames_size, int& frame_index)
+{
+	while (frame_index < frames_size)
+	{
+		if (GetKeyState(VK_LEFT) & 0x8000)
+		{
+			if (frame_index - fps * 5 >= 0)
+				frame_index -= fps * 5;
+			else
+				frame_index = 0;
+
+			Sleep(250);
+		}
+		else if (GetKeyState(VK_RIGHT) & 0x8000)
+		{
+			if (frame_index + fps * 5 < frames_size)
+				frame_index += fps * 5;
+			else
+				frame_index = frames_size - 1;
+
+			Sleep(250);
+		}
+	}
+}
+
+// std::min just likes to cause 74 PROBLEMS in the program for no reason
+int minimum(int a, int b)
+{
+	return (b < a) ? b : a;
+}
+
 int main()
 {
 	cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
@@ -187,12 +219,12 @@ int main()
 		limit = total_frames;
 
 	system("cls"); // Clear screen
-	auto start = std::chrono::high_resolution_clock::now(); // Start processing timer
+	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now(); // Start processing timer
 
 	while (count < limit)
 	{
 		// Start threads in parallel
-		for (int i = 0; i < temp_frames.size(); i++)
+		for (int i = 0; i < minimum(static_cast<int>(temp_frames.size()), limit - count); i++) // So basically, I want to die
 		{
 			// Load next frame
 			if (!video.read(frame))
@@ -211,12 +243,9 @@ int main()
 			if (i < threads.size())
 				threads[i].join();
 
-			if (count < limit)
-			{
-				frames.push_back(temp_frames[i]); // Write the completed frames to the frames vector
-				temp_frames[i].clear(); // Clear temporary frames
-				count++;
-			}
+			frames.push_back(temp_frames[i]); // Write the completed frames to the frames vector
+			temp_frames[i].clear(); // Clear temporary frames
+			count++;
 		}
 
 		threads.clear();
@@ -251,7 +280,7 @@ int main()
 		std::cout << "There was an error processing the video, however, " << count / fps << " seconds were still processed\n";
 	}
 
-	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << "It took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0  << " seconds to render " << count << " frames\n";
 	std::cout << "It took about " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / count << " milliseconds to render 1 frame\n";
 	std::cout << "It took about " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0 / count * fps << " seconds to render 1 second of the video\n";
@@ -267,13 +296,16 @@ int main()
 	std::cout << "\nVideo done processing. Enter any key to play video ";
 	std::cin >> c;
 
+	int frame_index = 0;
+	std::thread inputs_thread(detect_inputs, static_cast<int>(std::round(fps)), static_cast<int>(frames.size()), std::ref(frame_index));
+
 	std::cout << "\n\n\n";
 
-	for (const std::string& frame : frames)
+	for (; frame_index < frames.size(); frame_index++)
 	{
 		start_time = std::chrono::high_resolution_clock::now(); // Start display timer
 
-		std::cout << frame; // Output frame
+		std::cout << frames[frame_index]; // Output frame
 
 		SetConsoleCursorPosition(hStdout, {0, 0}); // Set cursor position to the top left of the console
 
@@ -287,8 +319,10 @@ int main()
 		// This makes sure the video retains it's original speed. The new milliseconds between frames is ms_between_frames + duration.
 		// If we want to retain the original speed of the video, we need to keep the original milliseconds between frames, which is ms_between_frames - duration
 		if (duration < ms_between_frames)
-			Sleep(static_cast<DWORD>(std::round(ms_between_frames - duration)));
+			Sleep(static_cast<DWORD>(std::round(ms_between_frames - duration))); // What even is a DWORD? I'm sleep deprived it's 1:06 AM.
 	}
+
+	inputs_thread.join();
 
 	// Clear screen of the last frame
 	system("cls");
