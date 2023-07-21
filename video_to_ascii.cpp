@@ -148,29 +148,8 @@ int main()
 	int screen_height = csbi.dwSize.Y;
 
 	std::string path;
-	std::cout << "Enter video path or a number from 1-10 for sample videos:\n";
+	std::cout << "Enter video path:\n";
 	std::getline(std::cin, path);
-
-	if (path == "1")
-		path = "C:\\Users\\User\\Programs\\Resources\\Star Wars Jedi  Fallen Order 2022.06.19 - 00.42.18.03.DVR.mp4";
-	else if (path == "2")
-		path = "C:\\Users\\User\\Programs\\Resources\\Blade and Sorcery 2023.05.13 - 01.05.20.02.mp4";
-	else if (path == "3")
-		path = "C:\\Users\\User\\Programs\\Resources\\Digital Combat Simulator  Black Shark 2022.11.23 - 21.32.24.02.DVR.mp4";
-	else if (path == "4")
-		path = "C:\\Users\\User\\Programs\\Resources\\[Alstroemeria Records]Bad Apple!! feat.nomico(Shadow Animation Version)[ACVS.008_Tr.00].mp4";
-	else if (path == "5")
-		path = "C:\\Users\\User\\Programs\\Resources\\Low quality Tyler the creator falling from the sky.mp4";
-	else if (path == "6")
-		path = "C:\\Users\\User\\Programs\\Resources\\Ultrakill 2023.03.22 - 21.45.24.16.DVR.mp4";
-	else if (path == "7")
-		path = "C:\\Users\\User\\Programs\\Resources\\ASTRONEER 2022.07.09 - 11.17.04.02.mp4";
-	else if (path == "8")
-		path = "C:\\Users\\User\\Videos\\Captures\\Apex Legends 2022-01-02 18-28-37.mp4";
-	else if (path == "9")
-		path = "C:\\Users\\User\\Programs\\Resources\\War Thunder 2022.06.04 - 16.02.25.22.DVR.mp4";
-	else if (path == "10")
-		path = "C:\\Users\\User\\Programs\\Resources\\Apex Legends 2021-11-26 23-20-39.mp4";
 
 	// Set up variables
 	cv::VideoCapture video(path);
